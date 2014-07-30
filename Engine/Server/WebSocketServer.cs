@@ -67,15 +67,31 @@ namespace Engine.Utility
                                 GameId = Request.Substring(3, 5);
                                 if (Response.Substring(3,2) == CardUtility.strOK)
                                 {
-                                    //使用动作完成
+                                    //使用动作完成后的战场状态
                                     SendToBoth(GameId, Response.Substring(0,3) + Response.Substring(5));
                                 }
                                 else
                                 {
-                                    //需要后续操作
+                                    //需要后续操作，中断续行
                                     Console.WriteLine(Response + " To " + MyConn);
                                     socket.Send(Response);
                                 }
+                                break;
+                            case ServerResponse.RequestType.结束游戏:
+                                GameId = Request.Substring(3, 5);
+                                //游戏字典去除，但是链接没有结束
+                                // Key:GameID + IsHost Value:Connection
+                                allGames.Remove(Request.Substring(3, 6));
+                                bool CanRemove = true;
+                                foreach (var item in allGames.Keys)
+                                {
+                                    if (item.StartsWith(GameId))
+                                    {
+                                        CanRemove = false;
+                                        break;
+                                    }
+                                }
+                                if (CanRemove) ServerResponse.RemoveGame(GameId);
                                 break;
                             default:
                                 Console.WriteLine(Response + " To " + MyConn);

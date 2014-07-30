@@ -19,17 +19,17 @@ namespace Engine.Control
         /// <summary>
         /// 当前是否为先手回合
         /// </summary>
-        public Boolean 上下半局 = true;
+        public bool 上下半局 = true;
         /// <summary>
         /// 主机作为先手
         /// </summary>
-        public Boolean HostAsFirst;
+        public bool HostAsFirst;
         /// <summary>
         /// 是否先手
         /// </summary>
         /// <param name="IsHost"></param>
         /// <returns></returns>
-        public Boolean IsFirst(Boolean IsHost)
+        public bool IsFirst(bool IsHost)
         {
             if (IsHost && HostAsFirst) return true;
             if (!IsHost && !HostAsFirst) return true;
@@ -38,7 +38,7 @@ namespace Engine.Control
         /// <summary>
         /// 事件处理组件
         /// </summary>
-        public Engine.Client.BattleEventHandler 事件处理组件 = new Engine.Client.BattleEventHandler();
+        public BattleEventHandler 事件处理组件 = new BattleEventHandler();
         /// <summary>
         /// 主机信息
         /// </summary>
@@ -56,11 +56,11 @@ namespace Engine.Control
             /// <summary>
             /// 游戏ID
             /// </summary>
-            public String GameId;
+            public string GameId;
             /// <summary>
             /// 是否为主机
             /// </summary>
-            public Boolean IsHost;
+            public bool IsHost;
             /// <summary>
             /// 中断步骤
             /// </summary>
@@ -68,11 +68,15 @@ namespace Engine.Control
             /// <summary>
             /// 中断步骤名称
             /// </summary>
-            public String ActionName;
+            public string ActionName;
             /// <summary>
             /// 附加情报
             /// </summary>
-            public String ExternalInfo;
+            public string ExternalInfo;
+            /// <summary>
+            /// 该操作的源头卡牌
+            /// </summary>
+            public MinimizeBattleInfo.HandCardInfo ActionCard;
             /// <summary>
             /// 客户端数据[通信用]
             /// </summary>
@@ -81,7 +85,7 @@ namespace Engine.Control
             /// 客户端数据[实际用]
             /// </summary>
             [JsonIgnore()]
-            public Dictionary<String, String> SessionDic
+            public Dictionary<string, string> SessionDic
             {
                 get
                 {
@@ -98,7 +102,7 @@ namespace Engine.Control
         /// </summary>
         /// <param name="IsHost"></param>
         /// <returns></returns>
-        public ActionStatus gameStatus(Boolean IsHost)
+        public ActionStatus gameStatus(bool IsHost)
         {
             ActionStatus actionStatus = new ActionStatus()
             {
@@ -128,7 +132,7 @@ namespace Engine.Control
         /// 当前是否为主机回合
         /// </summary>
         /// <returns></returns>
-        public Boolean IsHostNowTurn()
+        public bool IsHostNowTurn()
         {
             if (HostAsFirst && 上下半局) return true;
             if (!HostAsFirst && !上下半局) return true;
@@ -139,9 +143,9 @@ namespace Engine.Control
         /// </summary>
         /// <param name="newGameId"></param>
         /// <param name="hostNickName"></param>
-        public FullServerManager(int newGameId, String hostNickName)
+        public FullServerManager(int newGameId, string hostNickName)
         {
-            this.GameId = newGameId;
+            GameId = newGameId;
             HostStatus.NickName = hostNickName;
             //决定先后手,主机位先手概率为2/1
             HostAsFirst = (GameId % 2 == 0);
@@ -151,7 +155,7 @@ namespace Engine.Control
         /// </summary>
         /// <param name="IsHost">主机</param>
         /// <param name="cards">套牌</param>
-        public CardUtility.返回值枚举 SetCardStack(Boolean IsHost, Stack<String> cards)
+        public CardUtility.返回值枚举 SetCardStack(bool IsHost, Stack<string> cards)
         {
             if ((IsHost && HostAsFirst) || (!IsHost && !HostAsFirst))
             {
@@ -170,7 +174,7 @@ namespace Engine.Control
         /// <param name="IsHost"></param>
         /// <param name="Count"></param>
         /// <returns></returns>
-        public List<String> DrawCard(Boolean IsHost, int Count)
+        public List<string> DrawCard(bool IsHost, int Count)
         {
             var targetStock = IsHost ? HostStatus.CardDeck : GuestStatus.CardDeck;
             return targetStock.DrawCard(Count);
@@ -190,16 +194,18 @@ namespace Engine.Control
             HostStatus.BasicInfo.crystal.CurrentRemainPoint = 0;
             GuestStatus.BasicInfo.crystal.CurrentFullPoint = 0;
             GuestStatus.BasicInfo.crystal.CurrentRemainPoint = 0;
-            //英雄技能：奥术飞弹
-            HostStatus.BasicInfo.HeroAbility = (Engine.Card.SpellCard)Engine.Utility.CardUtility.GetCardInfoBySN("A000056");
-            GuestStatus.BasicInfo.HeroAbility = (Engine.Card.SpellCard)Engine.Utility.CardUtility.GetCardInfoBySN("A000056");
-
+            //英雄技能：召唤蜘蛛
+            HostStatus.BasicInfo.HeroAbility = (Card.SpellCard)CardUtility.GetCardInfoBySN("A110001");
+            //英雄技能：法术火球
+            GuestStatus.BasicInfo.HeroAbility = (Card.SpellCard)CardUtility.GetCardInfoBySN("A100002");
             //TEST START
-            //HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN("A000005"));
+            //法术测试：闷棍
+            //HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN("A000073"));
+            //战吼测试:叫嚣的中士
+            //HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN("M000054"));
             //亡语测试:鬼灵爬行者
-            HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN("M9A0001"));
+            HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN("M9A0003"));
             //TEST END
-
             //初始化双方手牌
             int DrawCardCnt = 0;
             if (HostAsFirst)
@@ -214,7 +220,7 @@ namespace Engine.Control
                 {
                     GuestStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(card));
                 }
-                GuestStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(Engine.Card.SpellCard.SN幸运币));
+                GuestStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(Card.SpellCard.SN幸运币));
 
                 HostStatus.BasicInfo.RemainCardDeckCount = CardDeck.MaxCards - 3;
                 GuestStatus.BasicInfo.RemainCardDeckCount = CardDeck.MaxCards - 4;
@@ -229,7 +235,7 @@ namespace Engine.Control
                 {
                     HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(card));
                 }
-                HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(Engine.Card.SpellCard.SN幸运币));
+                HostStatus.SelfInfo.handCards.Add(CardUtility.GetCardInfoBySN(Card.SpellCard.SN幸运币));
 
                 DrawCardCnt = PublicInfo.BasicHandCardCount;
                 foreach (var card in DrawCard(false, DrawCardCnt))
@@ -247,7 +253,7 @@ namespace Engine.Control
         /// 开始回合
         /// </summary>
         /// <param name="IsHost"></param>
-        public void TurnStart(Boolean IsHost)
+        public void TurnStart(bool IsHost)
         {
             gameStatus(IsHost).AllRole.MyPrivateInfo.handCards.Add(CardUtility.GetCardInfoBySN(DrawCard(IsHost, 1)[0]));
             TurnAction.TurnStart(gameStatus(IsHost));
@@ -256,7 +262,7 @@ namespace Engine.Control
         /// 结束回合
         /// </summary>
         /// <param name="IsHost"></param>
-        public void TurnEnd(Boolean IsHost)
+        public void TurnEnd(bool IsHost)
         {
             TurnAction.TurnEnd(gameStatus(IsHost));
             TurnStart(!IsHost);

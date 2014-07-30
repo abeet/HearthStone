@@ -1,13 +1,12 @@
 ﻿*.txt
 *.xml
 *.json
-*.png
 *.xlsx
-*.jpg
 *.suo
 *.zip
 /炉石设计/Fleck-master
 /炉石设计/lhgdialog
+/炉石设计/Misc
 /炉石设计/jquery-ui-1.11.0.custom
 /炉边传说/bin
 /炉边传说/obj
@@ -22,3 +21,7 @@
 /DesignDocument
 /ServerLoader
 Thumbs.db
+!/炉边传说/Html/Image/BackGround.jpg
+!/炉边传说/Html/Image/FireBall.jpg
+!/炉边传说/Html/Image/Hero.jpg
+!/炉边传说/Html/Image/Weapon.jpg

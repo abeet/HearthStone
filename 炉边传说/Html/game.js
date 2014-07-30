@@ -12,6 +12,7 @@ var IsMyTurn;
 var Interrupt;
 var ActiveCardSN;
 var strHost;
+var IsReStart;
 
 function onmessage(evt) {
     data = evt.data;
@@ -41,6 +42,9 @@ function onmessage(evt) {
             ResumeResponse();
             break;
         case RequestType.攻击行为:
+            if (!IsMyTurn) {
+                FightResponse();
+            }
             var message = RequestType.战场状态 + GameId + strHost;
             socket.send(message);
             break;
@@ -71,7 +75,8 @@ var RequestType = {
     初始化状态: "015",
     中断续行: "016",
     攻击行为: "017",
-    可攻击对象: "018"
+    可攻击对象: "018",
+    结束游戏: "019"
 };
 
 function CreateGameResponse() {
@@ -99,6 +104,11 @@ function EndTrun() {
     document.getElementById("btnEndTurn").setAttribute("display", "none");
 }
 
+function EndGame() {
+    var message = RequestType.结束游戏 + GameId + strHost;
+    socket.send(message);
+}
+
 function EndTrunResponse() {
     var IsHostEnd = data.toString().substr(0, 1) == strTrue;
     var message = RequestType.战场状态 + GameId + strHost;
@@ -107,6 +117,8 @@ function EndTrunResponse() {
         IsMyTurn = true;
         document.getElementById("btnEndTurn").setAttribute("display", "");
     }
+    var message = RequestType.战场状态 + GameId + strHost;
+    socket.send(message);
 }
 //设置套牌
 function SendDeck() {
@@ -115,7 +127,8 @@ function SendDeck() {
     } else {
         strHost = strFalse;
     }
-    var message = RequestType.传送套牌 + GameId + strHost + "M000017|M000018|M000021|M000003|M000024|M000026|M000027|M000035|M000037|M000047|M000043|M000041|M000040|M000059|M000058|M000057|M000054|M000061|M000064|M000065|M000067|M000076|M000077|M000082|M000088|M000087|M000085|M000084|M000068|M000076";
+    var message = RequestType.传送套牌 + GameId + strHost +
+    "M000017|M000018|M000021|M000003|M000024|M000026|M000027|M000035|M000037|M000047|M000043|M000041|M000040|M000059|M000058|M000057|M000054|M000061|M000064|M000065|M000067|M000076|M000077|M000082|M000088|M000087|M000085|M000084|M000068|M000076";
     socket.send(message);
 }
 //使用手牌
@@ -127,8 +140,18 @@ function UserHandCard(CardSN) {
     }
 }
 
+//战斗消息的处理
+function FightResponse() {
+    var YourPos = data.toString().substr(0, 1); 
+    var MyPos = data.toString().substr(1, 1);
+    InitActionDialog(YourPos, MyPos,"Fight");
+}
+function HideActionDialog() {
+    ActionDialog.dialog('close');
+    IsActionDialogShow = false;
+}
 //战斗
-function Fight(MyPos) {
+function GetFightTargetList(MyPos) {
     //获取战斗目标
     Interrupt.ActionName = "FIGHT";
     SessionData = MyPos + "|";
@@ -180,6 +203,17 @@ function UseHandCardResponse() {
 
     switch (Interrupt.ActionName) {
         case "OK":
+            if (!IsMyTurn) {
+                //和Fight一样，展示一下手牌使用状态
+                switch (Interrupt.ExternalInfo) {
+                    case "MINION":
+                        InitActionDialog(0, 0, "MINION");
+                        break;
+                    case "SPELL":
+                        InitActionDialog(0, 0, "SPELL");
+                        break;
+                }
+            }
             var message = RequestType.战场状态 + GameId + strHost;
             socket.send(message);
             break;

@@ -26,6 +26,7 @@
                 log("WebSocket not supported by this browser");
                 return;
             }
+            //var webSocket = new WebSocket("ws://121.199.16.71:13001/");
             var webSocket = new WebSocket("ws://localhost:13001/");
             webSocket.onopen = onopen;
             webSocket.onclose = onclose;
@@ -42,10 +43,12 @@
             log("Close a web socket.");
         }
 
-
+        //对话框的初始化操作
         var MinionPosDialog;
         var TargetPosDialog;
         var SpellDecideDialog;
+        var MessageDialog;
+        var ActionDialog;
 
         $(function () {
 
@@ -65,18 +68,28 @@
                     AfterTargetPos();
                 }
             });
-
             SpellDecideDialog = $("#formSpellDecide").dialog({
                 autoOpen: false,
                 modal: true,
                 width: 600,
                 height: 250
             });
+            MessageDialog = $("#formDialog").dialog({
+                autoOpen: false,
+                modal: true
+            });
+            ActionDialog = $("#formAction").dialog({
+                autoOpen: false,
+                modal: true,
+                width: 450,
+                height: 300
+            });
         });
     </script>
 </head>
 <body onload="init()">
     <form>
+        <input type="hidden" id="output" />
         <svg id="gamePanel" width="1600" height="750" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <rect width="1600" height="750" stroke="lightgreen" fill="transparent" stroke-width="2" />
             <!--注意如果文字在上面，则文字图层会覆盖按钮图层，造成OnClick事件无法响应-->
@@ -91,8 +104,10 @@
             </svg>
         </svg>
         <svg display="none" id="BasicPlayerInfo">
-            <!-- Weapon-->
-            <image xlink:href="Image/Weapon.jpg" x="0" y="0" height="50" width="50" />
+            <!-- 是否能攻击的标志 -->
+            <rect id="rctAttackable" x="0" y="90" width="50" height="10" stroke="lightgreen" fill="pink" stroke-width="2" />
+            <!-- 武器-->
+            <image xlink:href="Image/Weapon.jpg" x="0" y="100" height="50" width="50" />
             <svg id="HeroInfo" x="50" y="0">
                 <!-- Hero -->
                 <image id="imgHero" xlink:href="Image/Hero.jpg" x="0" y="0" height="150" width="150" />
@@ -106,8 +121,9 @@
                 <rect x="120" y="120" width="30" height="30" stroke="lightgreen" fill="red" stroke-width="2" />
                 <text id="txtHeroLifePoint" x="135" y="135" font-size="15" text-anchor="middle" fill="white">0</text>
             </svg>
-            <!-- Ablity-->
-            <image xlink:href="Image/FireBall.jpg" x="200" y="0" height="50" width="50" />
+            <!-- 技能 -->
+            <rect id="rctAbilityEnable" x="200" y="90" width="50" height="10" stroke="lightgreen" fill="pink" stroke-width="2" />
+            <image xlink:href="Image/FireBall.jpg" x="200" y="100" height="50" width="50" />
             <!--水晶 -->
             <text id="txtCystal" x="275" y="135" font-size="15" text-anchor="middle" fill="blue">0/0</text>
             <rect id="Cystal1" x="300" y="135" width="20" height="20" stroke="lightgreen" fill="lightBlue" stroke-width="2" />
@@ -133,7 +149,6 @@
             <text id="txtDescirption2" x="20" y="75" font-size="12" text-anchor="start" fill="black"></text>
             <text id="txtDescirption3" x="20" y="95" font-size="12" text-anchor="start" fill="black"></text>
 
-
             <!--左下角的攻击力 -->
             <rect x="0" y="120" width="30" height="30" stroke="lightgreen" fill="purple" stroke-width="2" />
             <text id="txtAttackPoint" x="15" y="135" font-size="15" text-anchor="middle" fill="white">0</text>
@@ -154,6 +169,14 @@
         </div>
         <div id="formTargetPos" title="选择目标位置">
             <svg id="TargetPanel" width="1000" height="350">
+            </svg>
+        </div>
+        <div id="formDialog" title="消息">
+            <p id="txtMessage"></p>
+        </div>
+        <div id="formAction" title="动作效果">
+            <p id="txtActionMessage"></p>
+            <svg id="ActionPanel" width="400" height="160">
             </svg>
         </div>
         <div id="formSpellDecide" title="抉择">
